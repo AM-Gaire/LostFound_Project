@@ -73,6 +73,3 @@ LostFound_Project/
 └── templates/         # HTML templates
 ```
 
-## License
-
-This project currently has no license specified.
