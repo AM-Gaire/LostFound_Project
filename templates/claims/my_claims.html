@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Reports & Claims | LostFound@Campus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .lk { transition: color .15s ease, opacity .15s ease, background .15s ease, transform .15s ease, box-shadow .2s ease, border-color .15s ease; }
+  .lk:hover { opacity: .85; }
+  .navlink { transition: color .15s ease, background .15s ease; }
+  .navlink:hover { color: #0f2240; background: #f1f4f9; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -14px rgba(15,34,64,.5); }
+  .row:hover { background: #f8fafc; }
+  .row { transition: background .14s ease; }
+  @keyframes lfUp { from { opacity:0; transform:translateY(22px); filter:blur(6px); } to { opacity:1; transform:none; filter:blur(0); } }
+  .lf-load { opacity: 0; animation: lfUp .7s cubic-bezier(.22,1,.36,1) forwards; }
+  @media (prefers-reduced-motion: reduce) { .lf-load { animation:none!important; opacity:1!important; transform:none!important; filter:none!important; } }
+</style>
+</head>
+<body>
+<div style="min-height:100vh; font-family:'Libre Franklin',sans-serif; color:#15233b; background:#f4f6fa;">
+
+  <!-- nav (student) -->
+  <div style="background:rgba(255,255,255,.88); backdrop-filter:blur(12px); border-bottom:1px solid #e7ebf1; position:sticky; top:0; z-index:30;">
+    <div style="max-width:1320px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 40px;">
+      <div style="display:flex; align-items:center; gap:36px;">
+        <a href="{% url 'home' %}" style="display:flex; align-items:center; gap:8px; font-family:'Source Serif 4',serif; font-weight:700; font-size:20px; color:#0f2240; letter-spacing:-.03em; white-space:nowrap; text-decoration:none;">
+          <span style="width:32px; height:32px; border-radius:9px; background:#0f2240; display:flex; align-items:center; justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+          </span><span style="white-space:nowrap;">LostFound<span style="color:#cf7a2c;">@</span>Campus</span>
+        </a>
+        <div style="display:flex; gap:4px;">
+          <a href="{% url 'dashboard' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">Dashboard</a>
+          <a href="{% url 'report_item' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">Report Lost Item</a>
+          <a href="{% url 'search' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">Search Found Items</a>
+          <a href="{% url 'my_claims' %}" class="navlink" style="font-size:14px; font-weight:600; color:#0f2240; background:#eaf0f9; text-decoration:none; padding:9px 15px; border-radius:8px;">My Reports &amp; Claims</a>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="display:flex; align-items:center; gap:10px; padding:5px 6px 5px 14px; border:1px solid #e7ebf1; border-radius:999px; background:#fff;">
+          <div style="text-align:right; line-height:1.2;">
+            <div style="font-size:13.5px; font-weight:600; color:#15233b;">{{ user.username }}</div>
+            <div style="font-size:11.5px; color:#9aa6b6;">Student</div>
+          </div>
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(150deg,#2a6fdb,#1a4fa0); color:#fff; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">{{ user.username|first|upper }}</div>
+        </div>
+        <form method="post" action="{% url 'logout' %}" style="margin:0;">{% csrf_token %}<button type="submit" class="lk" style="font-size:13.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:9px 16px; border-radius:9px; background:#fff; cursor:pointer;">Log Out</button></form>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1000px; margin:0 auto; padding:44px 40px 64px;">
+
+    <!-- flash messages -->
+    {% if messages %}
+    <div style="margin-bottom:22px;">
+      {% for message in messages %}
+      <div style="display:flex; align-items:flex-start; gap:12px; padding:14px 18px; border-radius:12px; margin-bottom:10px;
+        {% if message.tags == 'success' %}background:#e9f7ef; border:1px solid #bfe6ce;
+        {% elif message.tags == 'error' or message.tags == 'danger' %}background:#fdecec; border:1px solid #f3c4c4;
+        {% elif message.tags == 'warning' %}background:#fdf4e3; border:1px solid #f0dcb0;
+        {% else %}background:#eaf2fb; border:1px solid #c3d9f1;{% endif %}">
+        <span style="font-size:14px; font-weight:500;
+          {% if message.tags == 'success' %}color:#1f9d61;
+          {% elif message.tags == 'error' or message.tags == 'danger' %}color:#c02828;
+          {% elif message.tags == 'warning' %}color:#e9a64a;
+          {% else %}color:#2a6fdb;{% endif %}">{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- header -->
+    <div class="lf-load" style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:30px;">
+      <div>
+        <div style="font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#cf7a2c; margin-bottom:12px;">Student Portal</div>
+        <h1 style="font-family:'Source Serif 4',serif; font-size:38px; font-weight:700; color:#0f2240; margin:0; letter-spacing:-.02em;">My Reports &amp; Claims</h1>
+      </div>
+      <a href="{% url 'report_item' %}" class="btn lk" style="display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#fff; background:#0f2240; padding:11px 20px; border-radius:9px; text-decoration:none; transition:transform .15s ease, box-shadow .2s ease;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>
+        Report Lost Item
+      </a>
+    </div>
+
+    <!-- lost reports -->
+    <div class="lf-load" style="margin-bottom:30px;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d64545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        <h3 style="font-size:18px; font-weight:700; color:#0f2240; margin:0;">My Lost Item Reports</h3>
+      </div>
+      <div style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+        {% for item in lost_reports %}
+        <div class="row" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px; {% if not forloop.last %}border-bottom:1px solid #f1f4f8;{% endif %}">
+          <div>
+            <div style="font-size:15px; font-weight:700; color:#15233b;">{{ item.title }}</div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:2px;">{{ item.get_category_display }} · {{ item.location }} · {{ item.date_reported }}</div>
+          </div>
+          {% if item.status == 'open' %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1a4fa0; background:#eaf0f9; padding:5px 11px; border-radius:6px;">Open</span>
+          {% elif item.status == 'under_review' %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#b06a18; background:#fbeede; padding:5px 11px; border-radius:6px;">Under Review</span>
+          {% elif item.status == 'returned' %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1f7a4d; background:#e4f3ec; padding:5px 11px; border-radius:6px;">Returned</span>
+          {% else %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#46566f; background:#eef1f5; padding:5px 11px; border-radius:6px;">{{ item.get_status_display }}</span>
+          {% endif %}
+        </div>
+        {% empty %}
+        <div style="padding:32px 24px; text-align:center; font-size:14px; color:#9aa6b6;">You haven't reported any lost items yet.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- claims -->
+    <div class="lf-load">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2a6fdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"></path><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        <h3 style="font-size:18px; font-weight:700; color:#0f2240; margin:0;">My Claims on Found Items</h3>
+      </div>
+      <div style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+        {% for claim in claims %}
+        <div class="row" style="display:flex; align-items:{% if claim.admin_notes %}flex-start{% else %}center{% endif %}; justify-content:space-between; gap:14px; padding:16px 24px; {% if not forloop.last %}border-bottom:1px solid #f1f4f8;{% endif %}">
+          <div style="flex:1;">
+            <div style="font-size:15px; font-weight:700; color:#15233b;">{{ claim.item.title }}</div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:2px;">Submitted {{ claim.submitted_at|date:"d M Y, H:i" }}</div>
+            {% if claim.admin_notes and claim.status != 'approved' %}
+            <div style="display:flex; align-items:flex-start; gap:7px; margin-top:8px; background:#eaf2fb; border:1px solid #c3d9f1; border-radius:9px; padding:9px 12px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#2a6fdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top:1px; flex:none;"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span style="font-size:13px; color:#1a3a66; line-height:1.5;">{{ claim.admin_notes }}</span>
+            </div>
+            {% endif %}
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex:none;">
+            {% if claim.status == 'approved' and claim.item.status == 'returned' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1f7a4d; background:#e4f3ec; padding:5px 11px; border-radius:6px; white-space:nowrap;">Collected</span>
+            {% elif claim.status == 'approved' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1f7a4d; background:#e4f3ec; padding:5px 11px; border-radius:6px; white-space:nowrap;">Approved</span>
+              <span style="font-size:12px; color:#46566f; text-align:right; line-height:1.4; margin-top:6px; max-width:160px;">Please collect your item from the campus lost &amp; found office.</span>
+            {% elif claim.status == 'rejected' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#a82020; background:#fdecec; padding:5px 11px; border-radius:6px; white-space:nowrap;">Rejected</span>
+            {% elif claim.status == 'info_requested' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#b06a18; background:#fbeede; padding:5px 11px; border-radius:6px; white-space:nowrap;">Info Requested</span>
+              <button id="reply-btn-{{ claim.id }}" onclick="this.style.display='none'; document.getElementById('reply-{{ claim.id }}').style.display='block';" style="display:inline-flex; align-items:center; gap:6px; font:600 12.5px 'Libre Franklin',sans-serif; color:#b06a18; background:#fef6ec; border:1.5px solid #f5d9a8; padding:7px 13px; border-radius:8px; cursor:pointer; white-space:nowrap; margin-top:10px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                Reply
+              </button>
+            {% else %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#46566f; background:#eef1f5; padding:5px 11px; border-radius:6px; white-space:nowrap;">{{ claim.get_status_display }}</span>
+            {% endif %}
+          </div>
+        </div>
+        {% if claim.status == 'info_requested' %}
+        <div id="reply-{{ claim.id }}" style="display:none; padding:0 24px 16px;">
+          <form method="post" action="{% url 'update_claim' claim.id %}">
+            {% csrf_token %}
+            <textarea name="additional_info" placeholder="Add the extra details the admin has requested…" style="width:100%; min-height:88px; resize:vertical; border:1.5px solid #f5d9a8; border-radius:10px; padding:11px 13px; font:500 14px 'Libre Franklin',sans-serif; color:#15233b; background:#fffaf4; line-height:1.5; outline:none; margin-bottom:10px;" onfocus="this.style.borderColor='#cf7a2c'" onblur="this.style.borderColor='#f5d9a8'"></textarea>
+            <div style="display:flex; gap:8px;">
+              <button type="submit" style="display:inline-flex; align-items:center; gap:6px; font:600 13.5px 'Libre Franklin',sans-serif; color:#fff; background:#0f2240; border:none; padding:10px 18px; border-radius:9px; cursor:pointer;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z"></path></svg>
+                Submit
+              </button>
+              <button type="button" onclick="document.getElementById('reply-{{ claim.id }}').style.display='none'; document.getElementById('reply-btn-{{ claim.id }}').style.display='inline-flex';" style="font:600 13.5px 'Libre Franklin',sans-serif; color:#7c899c; background:#f4f6fa; border:1.5px solid #e7ebf1; padding:10px 16px; border-radius:9px; cursor:pointer;">Cancel</button>
+            </div>
+          </form>
+        </div>
+        {% endif %}
+        {% empty %}
+        <div style="padding:32px 24px; text-align:center;">
+          <div style="font-size:14px; color:#9aa6b6; margin-bottom:6px;">You haven't submitted any claims yet.</div>
+          <a href="{% url 'search' %}" style="font-size:13.5px; font-weight:600; color:#2a6fdb; text-decoration:none;">Search found items →</a>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

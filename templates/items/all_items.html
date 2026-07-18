@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Items | Campus Lost &amp; Found</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    .lk { transition: color .15s ease, opacity .15s ease, background .15s ease, transform .15s ease, box-shadow .2s ease, border-color .15s ease; }
+    .lk:hover { opacity: .85; }
+    .navlink { transition: color .15s ease, background .15s ease; text-decoration: none; }
+    .navlink:hover { color: #0f2240; background: #f1f4f9; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 14px 28px -14px rgba(15,34,64,.5); }
+    .lf-input { transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+    .lf-input:focus { border-color: #0f2240; box-shadow: 0 0 0 4px rgba(15,34,64,.1); background: #fff; outline: none; }
+    .lf-row { transition: background .14s ease; }
+    .lf-row:hover { background: #f8fafc; }
+    @keyframes lfUp { from { opacity:0; transform:translateY(20px); filter:blur(5px); } to { opacity:1; transform:none; filter:blur(0); } }
+    .lf-load { opacity: 0; animation: lfUp .7s cubic-bezier(.22,1,.36,1) forwards; }
+    .lf-load:nth-child(2) { animation-delay: .08s; }
+    .lf-load:nth-child(3) { animation-delay: .14s; }
+    .lf-load:nth-child(4) { animation-delay: .20s; }
+    [data-rows] > .lf-row { opacity:0; transform:translateY(14px); filter:blur(4px); transition: opacity .5s ease, transform .5s cubic-bezier(.22,1,.36,1), filter .5s ease; }
+    [data-rows].lf-seen > .lf-row { opacity:1; transform:none; filter:blur(0); }
+    [data-rows].lf-seen > .lf-row:nth-child(2) { transition-delay: .04s; }
+    [data-rows].lf-seen > .lf-row:nth-child(3) { transition-delay: .08s; }
+    [data-rows].lf-seen > .lf-row:nth-child(4) { transition-delay: .12s; }
+    [data-rows].lf-seen > .lf-row:nth-child(5) { transition-delay: .16s; }
+    [data-rows].lf-seen > .lf-row:nth-child(6) { transition-delay: .20s; }
+    [data-rows].lf-seen > .lf-row:nth-child(7) { transition-delay: .24s; }
+    [data-rows].lf-seen > .lf-row:nth-child(8) { transition-delay: .28s; }
+    @media (prefers-reduced-motion: reduce) {
+      .lf-load, [data-rows] > .lf-row { animation:none!important; opacity:1!important; transform:none!important; filter:none!important; }
+    }
+  </style>
+</head>
+<body>
+
+<div style="min-height:100vh; font-family:'Libre Franklin',sans-serif; color:#15233b; background:#f4f6fa;">
+
+  <!-- Sticky Navbar -->
+  <div style="background:rgba(255,255,255,.88); backdrop-filter:blur(12px); border-bottom:1px solid #e7ebf1; position:sticky; top:0; z-index:30;">
+    <div style="max-width:1320px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 40px;">
+      <div style="display:flex; align-items:center; gap:36px;">
+        <a href="{% url 'home' %}" style="display:flex; align-items:center; gap:8px; font-family:'Source Serif 4',serif; font-weight:700; font-size:20px; color:#0f2240; letter-spacing:-.03em; white-space:nowrap; text-decoration:none;">
+          <span style="width:32px; height:32px; border-radius:9px; background:#0f2240; display:flex; align-items:center; justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </span><span style="white-space:nowrap;">LostFound<span style="color:#cf7a2c;">@</span>Campus</span>
+        </a>
+        <div style="display:flex; gap:4px;">
+          <a href="{% url 'dashboard' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Dashboard</a>
+          <a href="{% url 'all_items' %}" class="navlink" style="font-size:14px; font-weight:600; color:#0f2240; background:#eaf0f9; padding:9px 15px; border-radius:8px;">All Items</a>
+          <a href="{% url 'claim_review_list' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Review Claims</a>
+          <a href="{% url 'manage_users' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Manage Users</a>
+          <a href="{% url 'audit_log' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Audit Log</a>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="display:flex; align-items:center; gap:10px; padding:5px 6px 5px 14px; border:1px solid #e7ebf1; border-radius:999px; background:#fff;">
+          <div style="text-align:right; line-height:1.2;">
+            <div style="font-size:13.5px; font-weight:600; color:#15233b;">{{ request.user.username }}</div>
+            <div style="font-size:11.5px; color:#9aa6b6;">Administrator</div>
+          </div>
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(150deg,#163763,#0f2240); color:#e9a64a; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">
+            {{ request.user.username|first|upper }}
+          </div>
+        </div>
+        <form method="post" action="{% url 'logout' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="lk" style="font-size:13.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:9px 16px; border-radius:9px; background:#fff; cursor:pointer;">Log Out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1320px; margin:0 auto; padding:44px 40px 64px;">
+
+    <!-- Page Header -->
+    <div class="lf-load" style="display:flex; align-items:flex-start; justify-content:space-between; gap:20px; margin-bottom:34px;">
+      <div>
+        <div style="font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#cf7a2c; margin-bottom:12px;">Administrator Portal</div>
+        <h1 style="font-family:'Source Serif 4',serif; font-size:42px; font-weight:700; color:#0f2240; margin:0 0 10px; letter-spacing:-.02em;">All Reported Items</h1>
+        <p style="font-size:17px; color:#566; margin:0;">Every lost and found report across the system.</p>
+      </div>
+      <a href="{% url 'dashboard' %}" class="lk" style="display:inline-flex; align-items:center; gap:8px; font-size:14px; font-weight:600; color:#0f2240; background:#fff; border:1.5px solid #d7dde6; padding:11px 18px; border-radius:9px; text-decoration:none; white-space:nowrap; margin-top:6px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f2240" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        Dashboard
+      </a>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="lf-load" style="background:#fff; border:1px solid #e9edf2; border-radius:16px; padding:22px 24px; margin-bottom:24px;">
+      <form method="get">
+        <div style="display:grid; grid-template-columns:1fr 1fr auto {% if filter_type or filter_status %}auto{% endif %}; gap:18px; align-items:end;">
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#3a4a61; margin-bottom:8px;">Type</label>
+            <div style="position:relative;">
+              <select name="type" class="lf-input" style="width:100%; appearance:none; -webkit-appearance:none; border:1.5px solid #d7dde6; border-radius:10px; padding:13px 16px; font:500 15px 'Libre Franklin',sans-serif; color:#15233b; background:#fbfcfe; cursor:pointer;">
+                <option value="">All Types</option>
+                <option value="lost" {% if filter_type == 'lost' %}selected{% endif %}>Lost</option>
+                <option value="found" {% if filter_type == 'found' %}selected{% endif %}>Found</option>
+              </select>
+              <svg style="position:absolute; right:14px; top:50%; transform:translateY(-50%); pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa6b6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+          <div>
+            <label style="display:block; font-size:13px; font-weight:600; color:#3a4a61; margin-bottom:8px;">Status</label>
+            <div style="position:relative;">
+              <select name="status" class="lf-input" style="width:100%; appearance:none; -webkit-appearance:none; border:1.5px solid #d7dde6; border-radius:10px; padding:13px 16px; font:500 15px 'Libre Franklin',sans-serif; color:#15233b; background:#fbfcfe; cursor:pointer;">
+                <option value="">All Statuses</option>
+                {% for value, label in statuses %}
+                <option value="{{ value }}" {% if filter_status == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+              <svg style="position:absolute; right:14px; top:50%; transform:translateY(-50%); pointer-events:none;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9aa6b6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+          <button type="submit" class="btn" style="font:600 15px 'Libre Franklin',sans-serif; color:#fff; background:#0f2240; border:none; padding:13px 34px; border-radius:10px; cursor:pointer; transition:transform .15s ease, box-shadow .2s ease; white-space:nowrap;">Filter</button>
+          {% if filter_type or filter_status %}
+          <a href="{% url 'all_items' %}" class="lk" style="font:600 15px 'Libre Franklin',sans-serif; color:#5b6b7e; background:#f4f6fa; border:1.5px solid #d7dde6; padding:13px 20px; border-radius:10px; text-decoration:none; text-align:center; white-space:nowrap;">Clear</a>
+          {% endif %}
+        </div>
+      </form>
+    </div>
+
+    <!-- Count -->
+    <div class="lf-load" style="font-size:14px; color:#7c899c; margin-bottom:16px;">
+      Showing <strong style="color:#3a4a61;">{{ items|length }} item{{ items|length|pluralize }}</strong>
+    </div>
+
+    <!-- Table -->
+    <div class="lf-load" style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+      <!-- Header -->
+      <div style="display:grid; grid-template-columns:48px 2.2fr .8fr 1fr 1.3fr 1.1fr 1fr 1fr .7fr; gap:12px; padding:16px 26px; border-bottom:1px solid #eef1f5; background:#fafbfc;">
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">#</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">TITLE</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">TYPE</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">CATEGORY</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">LOCATION</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">REPORTED BY</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">DATE</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;">STATUS</div>
+        <div style="font-size:12.5px; font-weight:700; letter-spacing:.04em; color:#8a93a0;"></div>
+      </div>
+
+      <!-- Rows -->
+      {% if items %}
+      <div data-rows>
+        {% for item in items %}
+        <div class="lf-row" style="display:grid; grid-template-columns:48px 2.2fr .8fr 1fr 1.3fr 1.1fr 1fr 1fr .7fr; gap:12px; padding:18px 26px; border-bottom:1px solid #f1f4f8; align-items:start;">
+          <div style="font-size:14px; color:#9aa6b6; padding-top:2px;">{{ item.id }}</div>
+          <div>
+            <div style="font-size:15.5px; font-weight:700; color:#15233b;">{{ item.title }}</div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:2px;">{{ item.description|truncatechars:55 }}</div>
+          </div>
+          <div>
+            {% if item.item_type == 'found' %}
+            <span style="font-size:11.5px; font-weight:700; color:#1f7a44; background:#e2f3e8; padding:4px 10px; border-radius:6px; white-space:nowrap;">Found</span>
+            {% else %}
+            <span style="font-size:11.5px; font-weight:700; color:#b42318; background:#fde7e4; padding:4px 10px; border-radius:6px; white-space:nowrap;">Lost</span>
+            {% endif %}
+          </div>
+          <div style="font-size:14px; color:#3a4a61;">{{ item.get_category_display }}</div>
+          <div style="font-size:14px; color:#3a4a61;">{{ item.location }}</div>
+          <div style="font-size:14px; color:#3a4a61;">{{ item.reported_by.username }}</div>
+          <div style="font-size:14px; color:#566; white-space:nowrap;">{{ item.date_reported|date:"M j, Y" }}</div>
+          <div>
+            {% if item.status == 'open' %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; color:#15497e; background:#e1edfb; padding:4px 9px; border-radius:6px; white-space:nowrap;">OPEN</span>
+            {% elif item.status == 'under_review' %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; color:#8a5a00; background:#fcefcf; padding:4px 9px; border-radius:6px; white-space:nowrap;">UNDER REVIEW</span>
+            {% elif item.status == 'returned' %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; color:#1f7a44; background:#cdebd6; padding:4px 9px; border-radius:6px; white-space:nowrap;">RETURNED</span>
+            {% else %}
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; color:#566; background:#eef1f5; padding:4px 9px; border-radius:6px;">{{ item.get_status_display|upper }}</span>
+            {% endif %}
+          </div>
+          <div style="padding-top:2px;">
+            <a href="{% url 'item_manage' item.id %}" class="lk" style="font-size:13px; font-weight:600; color:#cf7a2c; text-decoration:none; white-space:nowrap;">Manage →</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div style="padding:64px 26px; text-align:center;">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#d7dde6" stroke-width="1.5" stroke-linecap="round" style="margin:0 auto 16px; display:block;"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <div style="font-size:16px; font-weight:600; color:#8a93a0; margin-bottom:6px;">No items found</div>
+        <div style="font-size:14px; color:#b0b9c4;">No items match the selected filters.</div>
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var setup = function() {
+    var nodes = document.querySelectorAll('[data-rows]:not(.lf-seen)');
+    if (!('IntersectionObserver' in window)) {
+      nodes.forEach(function(n) { n.classList.add('lf-seen'); });
+      return;
+    }
+    var obs = new IntersectionObserver(function(entries) {
+      entries.forEach(function(e) {
+        if (e.isIntersecting) e.target.classList.add('lf-seen');
+      });
+    }, { threshold: 0.05 });
+    nodes.forEach(function(n) { obs.observe(n); });
+  };
+  requestAnimationFrame(function() { requestAnimationFrame(setup); });
+})();
+</script>
+
+</body>
+</html>

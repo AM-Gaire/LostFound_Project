@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage — {{ target.username }} | Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    .lk { transition: color .15s ease, opacity .15s ease, background .15s ease, transform .15s ease, box-shadow .2s ease, border-color .15s ease; }
+    .lk:hover { opacity: .85; }
+    .navlink { transition: color .15s ease, background .15s ease; text-decoration: none; }
+    .navlink:hover { color: #0f2240; background: #f1f4f9; }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -14px rgba(15,34,64,.4); }
+    .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -14px rgba(192,40,40,.45); }
+    .lf-input { transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+    .lf-input:focus { border-color: #0f2240; box-shadow: 0 0 0 4px rgba(15,34,64,.1); background: #fff; outline: none; }
+    .lf-input.is-invalid { border-color: #dc2626; }
+    @keyframes lfUp { from { opacity:0; transform:translateY(22px); filter:blur(6px); } to { opacity:1; transform:none; filter:blur(0); } }
+    .lf-load { opacity: 0; animation: lfUp .7s cubic-bezier(.22,1,.36,1) forwards; }
+    .lf-load:nth-child(2) { animation-delay: .1s; }
+    @media (prefers-reduced-motion: reduce) { .lf-load { animation:none!important; opacity:1!important; transform:none!important; filter:none!important; } }
+  </style>
+</head>
+<body>
+
+<div style="min-height:100vh; font-family:'Libre Franklin',sans-serif; color:#15233b; background:#f4f6fa;">
+
+  <!-- Navbar -->
+  <div style="background:rgba(255,255,255,.88); backdrop-filter:blur(12px); border-bottom:1px solid #e7ebf1; position:sticky; top:0; z-index:30;">
+    <div style="max-width:1320px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 40px;">
+      <div style="display:flex; align-items:center; gap:36px;">
+        <a href="{% url 'home' %}" style="display:flex; align-items:center; gap:8px; font-family:'Source Serif 4',serif; font-weight:700; font-size:20px; color:#0f2240; letter-spacing:-.03em; white-space:nowrap; text-decoration:none;">
+          <span style="width:32px; height:32px; border-radius:9px; background:#0f2240; display:flex; align-items:center; justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          </span><span style="white-space:nowrap;">LostFound<span style="color:#cf7a2c;">@</span>Campus</span>
+        </a>
+        <div style="display:flex; gap:4px;">
+          <a href="{% url 'dashboard' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Dashboard</a>
+          <a href="{% url 'all_items' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">All Items</a>
+          <a href="{% url 'claim_review_list' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Review Claims</a>
+          <a href="{% url 'manage_users' %}" class="navlink" style="font-size:14px; font-weight:600; color:#0f2240; background:#eaf0f9; padding:9px 15px; border-radius:8px;">Manage Users</a>
+          <a href="{% url 'audit_log' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; padding:9px 15px; border-radius:8px;">Audit Log</a>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="display:flex; align-items:center; gap:10px; padding:5px 6px 5px 14px; border:1px solid #e7ebf1; border-radius:999px; background:#fff;">
+          <div style="text-align:right; line-height:1.2;">
+            <div style="font-size:13.5px; font-weight:600; color:#15233b;">{{ request.user.username }}</div>
+            <div style="font-size:11.5px; color:#9aa6b6;">Administrator</div>
+          </div>
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(150deg,#163763,#0f2240); color:#e9a64a; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">
+            {{ request.user.username|first|upper }}
+          </div>
+        </div>
+        <form method="post" action="{% url 'logout' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="lk" style="font-size:13.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:9px 16px; border-radius:9px; background:#fff; cursor:pointer;">Log Out</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1000px; margin:0 auto; padding:44px 40px 64px;">
+
+    <!-- Header -->
+    <div class="lf-load" style="margin-bottom:30px;">
+      <a href="{% url 'manage_users' %}" class="lk" style="display:inline-flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:9px 16px; border-radius:9px; text-decoration:none; background:#fff; margin-bottom:22px;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f2240" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+        Back to Manage Users
+      </a>
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:8px;">
+        <h1 style="font-family:'Source Serif 4',serif; font-size:36px; font-weight:700; color:#0f2240; margin:0; letter-spacing:-.02em;">Manage — {{ target.username }}</h1>
+        {% if target.role == 'staff' %}
+        <span style="font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1f7a4d; background:#e4f3ec; padding:5px 12px; border-radius:7px;">Staff</span>
+        {% elif target.role == 'student' %}
+        <span style="font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1a4fa0; background:#eaf0f9; padding:5px 12px; border-radius:7px;">Student</span>
+        {% endif %}
+      </div>
+      <p style="font-size:15.5px; color:#7c899c; margin:0;">{{ target.email|default:"No email" }}</p>
+    </div>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div style="margin-bottom:20px; padding:14px 18px; border-radius:10px; font-size:14px; font-weight:600;
+      {% if message.tags == 'success' %}background:#e4f3ec; border:1px solid #b2dfc5; color:#1f7a4d;
+      {% else %}background:#fdeaea; border:1px solid #f7c5c5; color:#c02828;{% endif %}">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; align-items:stretch;">
+
+      <!-- Change Password -->
+      <div class="lf-load" style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; gap:10px; padding:20px 26px; border-bottom:1px solid #eef1f5;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cf7a2c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/></svg>
+          <h3 style="font-size:16.5px; font-weight:700; color:#0f2240; margin:0;">Change Password</h3>
+        </div>
+        <div style="padding:26px; display:flex; flex-direction:column; flex:1;">
+          <form method="post" style="display:flex; flex-direction:column; flex:1;">
+            {% csrf_token %}
+            <label style="display:block; font-size:13px; font-weight:600; color:#3a4a61; margin-bottom:7px;">New Password</label>
+            <input type="password" name="new_password"
+              class="lf-input {% if form.new_password.errors %}is-invalid{% endif %}"
+              placeholder="••••••••"
+              style="width:100%; border:1.5px solid {% if form.new_password.errors %}#dc2626{% else %}#d7dde6{% endif %}; border-radius:9px; padding:12px 14px; font:500 14.5px 'Libre Franklin',sans-serif; color:#15233b; background:#fbfcfe; display:block; margin-bottom:{% if form.new_password.errors %}6px{% else %}4px{% endif %};">
+            {% for error in form.new_password.errors %}<div style="font-size:12.5px; color:#dc2626; margin-bottom:4px;">{{ error }}</div>{% endfor %}
+            <p style="font-size:12.5px; color:#9aa6b6; margin:0 0 18px;">Minimum 8 characters.</p>
+
+            <label style="display:block; font-size:13px; font-weight:600; color:#3a4a61; margin-bottom:7px;">Confirm New Password</label>
+            <input type="password" name="confirm_password"
+              class="lf-input {% if form.confirm_password.errors %}is-invalid{% endif %}"
+              placeholder="••••••••"
+              style="width:100%; border:1.5px solid {% if form.confirm_password.errors %}#dc2626{% else %}#d7dde6{% endif %}; border-radius:9px; padding:12px 14px; font:500 14.5px 'Libre Franklin',sans-serif; color:#15233b; background:#fbfcfe; display:block; margin-bottom:{% if form.confirm_password.errors %}6px{% else %}26px{% endif %};">
+            {% for error in form.confirm_password.errors %}<div style="font-size:12.5px; color:#dc2626; margin-bottom:20px;">{{ error }}</div>{% endfor %}
+
+            <button type="submit" class="btn" style="margin-top:auto; width:100%; display:flex; align-items:center; justify-content:center; gap:8px; font:600 14.5px 'Libre Franklin',sans-serif; color:#0f2240; background:#e9a64a; border:none; padding:13px; border-radius:10px; cursor:pointer; transition:transform .15s ease, box-shadow .2s ease;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#0f2240" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></svg>
+              Update Password
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Delete Account -->
+      <div class="lf-load" style="background:#fff; border:1px solid #f0c4c4; border-radius:16px; overflow:hidden; display:flex; flex-direction:column;">
+        <div style="display:flex; align-items:center; gap:10px; padding:20px 26px; border-bottom:1px solid #f7e0e0; background:#fdf6f6;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c02828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          <h3 style="font-size:16.5px; font-weight:700; color:#c02828; margin:0;">Delete Account</h3>
+        </div>
+        <div style="padding:26px; display:flex; flex-direction:column; flex:1;">
+          <p style="font-size:14px; color:#7c899c; line-height:1.6; margin:0 0 22px;">
+            Permanently removes <strong style="color:#3a4a61;">{{ target.username }}</strong>'s account.
+            All items and claims linked to this account will also be deleted. This cannot be undone.
+          </p>
+          <a href="{% url 'delete_user' target.id %}" class="btn-danger" style="margin-top:auto; display:flex; align-items:center; justify-content:center; gap:8px; font:600 14.5px 'Libre Franklin',sans-serif; color:#fff; background:#c02828; border:none; padding:13px; border-radius:10px; cursor:pointer; text-decoration:none; transition:transform .15s ease, box-shadow .2s ease;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Delete Account
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

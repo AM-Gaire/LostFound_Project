@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review Panel | LostFound@Campus</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .lk { transition: color .15s ease, opacity .15s ease, background .15s ease, transform .15s ease, box-shadow .2s ease, border-color .15s ease; }
+  .lk:hover { opacity: .85; }
+  .navlink { transition: color .15s ease, background .15s ease; }
+  .navlink:hover { color: #0f2240; background: #f1f4f9; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -14px rgba(15,34,64,.5); }
+  .mbtn:hover { background: #eaf0f9; border-color: #cdd9ec; }
+  .mbtn { transition: background .14s ease, border-color .14s ease; }
+  .row:hover { background: #f8fafc; }
+  .row { transition: background .14s ease; }
+  @keyframes lfUp { from { opacity:0; transform:translateY(22px); filter:blur(6px); } to { opacity:1; transform:none; filter:blur(0); } }
+  .lf-load { opacity: 0; animation: lfUp .7s cubic-bezier(.22,1,.36,1) forwards; }
+  @media (prefers-reduced-motion: reduce) { .lf-load { animation:none!important; opacity:1!important; transform:none!important; filter:none!important; } }
+</style>
+</head>
+<body>
+<div style="min-height:100vh; font-family:'Libre Franklin',sans-serif; color:#15233b; background:#f4f6fa;">
+
+  <!-- nav -->
+  <div style="background:rgba(255,255,255,.88); backdrop-filter:blur(12px); border-bottom:1px solid #e7ebf1; position:sticky; top:0; z-index:30;">
+    <div style="max-width:1320px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; padding:14px 40px;">
+      <div style="display:flex; align-items:center; gap:36px;">
+        <a href="{% url 'home' %}" style="display:flex; align-items:center; gap:8px; font-family:'Source Serif 4',serif; font-weight:700; font-size:20px; color:#0f2240; letter-spacing:-.03em; white-space:nowrap; text-decoration:none;">
+          <span style="width:32px; height:32px; border-radius:9px; background:#0f2240; display:flex; align-items:center; justify-content:center;">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+          </span><span style="white-space:nowrap;">LostFound<span style="color:#cf7a2c;">@</span>Campus</span>
+        </a>
+        <div style="display:flex; gap:4px;">
+          <a href="{% url 'dashboard' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">Dashboard</a>
+          <a href="{% url 'all_items' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">All Items</a>
+          <a href="{% url 'claim_review_list' %}" class="navlink" style="font-size:14px; font-weight:600; color:#0f2240; background:#eaf0f9; text-decoration:none; padding:9px 15px; border-radius:8px;">Review Claims</a>
+          <a href="{% url 'manage_users' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">Manage Users</a>
+          <a href="{% url 'audit_log' %}" class="navlink" style="font-size:14px; font-weight:500; color:#5b6b7e; text-decoration:none; padding:9px 15px; border-radius:8px;">Audit Log</a>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <div style="display:flex; align-items:center; gap:10px; padding:5px 6px 5px 14px; border:1px solid #e7ebf1; border-radius:999px; background:#fff;">
+          <div style="text-align:right; line-height:1.2;">
+            <div style="font-size:13.5px; font-weight:600; color:#15233b;">{{ user.username }}</div>
+            <div style="font-size:11.5px; color:#9aa6b6;">Administrator</div>
+          </div>
+          <div style="width:34px; height:34px; border-radius:50%; background:linear-gradient(150deg,#163763,#0f2240); color:#e9a64a; font-weight:700; font-size:14px; display:flex; align-items:center; justify-content:center;">{{ user.username|first|upper }}</div>
+        </div>
+        <form method="post" action="{% url 'logout' %}" style="margin:0;">{% csrf_token %}<button type="submit" class="lk" style="font-size:13.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:9px 16px; border-radius:9px; background:#fff; cursor:pointer;">Log Out</button></form>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width:1100px; margin:0 auto; padding:44px 40px 64px;">
+
+    <!-- flash messages -->
+    {% if messages %}
+    <div style="margin-bottom:22px;">
+      {% for message in messages %}
+      <div style="display:flex; align-items:flex-start; gap:12px; padding:14px 18px; border-radius:12px; margin-bottom:10px;
+        {% if message.tags == 'success' %}background:#e9f7ef; border:1px solid #bfe6ce;
+        {% elif message.tags == 'error' or message.tags == 'danger' %}background:#fdecec; border:1px solid #f3c4c4;
+        {% elif message.tags == 'warning' %}background:#fdf4e3; border:1px solid #f0dcb0;
+        {% else %}background:#eaf2fb; border:1px solid #c3d9f1;{% endif %}">
+        <span style="font-size:14px; font-weight:500;
+          {% if message.tags == 'success' %}color:#1f9d61;
+          {% elif message.tags == 'error' or message.tags == 'danger' %}color:#c02828;
+          {% elif message.tags == 'warning' %}color:#e9a64a;
+          {% else %}color:#2a6fdb;{% endif %}">{{ message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- header -->
+    <div class="lf-load" style="margin-bottom:30px;">
+      <div style="font-size:13px; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#cf7a2c; margin-bottom:12px;">Administrator</div>
+      <h1 style="font-family:'Source Serif 4',serif; font-size:38px; font-weight:700; color:#0f2240; margin:0 0 8px; letter-spacing:-.02em;">Review Panel</h1>
+      <p style="font-size:16px; color:#566; margin:0;">All reported items and pending claim decisions in one place.</p>
+    </div>
+
+    <!-- section 1: claims awaiting decision -->
+    <div class="lf-load" style="margin-bottom:30px;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:14px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cf7a2c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"></path></svg>
+        <h3 style="font-size:18px; font-weight:700; color:#0f2240; margin:0;">Claims Awaiting Decision</h3>
+        {% if claims %}<span style="font-size:12px; font-weight:700; color:#b06a18; background:#fbeede; padding:3px 9px; border-radius:999px;">{{ claims|length }}</span>{% endif %}
+      </div>
+      <div style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+        {% for claim in claims %}
+        <div class="row" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px; {% if not forloop.last %}border-bottom:1px solid #f1f4f8;{% endif %}">
+          <div>
+            <div style="display:flex; align-items:center; gap:9px;">
+              <span style="font-size:15px; font-weight:700; color:#15233b;">{{ claim.item.title }}</span>
+              {% if claim.status == 'info_requested' %}
+                <span style="font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1a4fa0; background:#eaf0f9; padding:3px 8px; border-radius:6px;">Info Requested</span>
+              {% else %}
+                <span style="font-size:10.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#b06a18; background:#fbeede; padding:3px 8px; border-radius:6px;">Pending Review</span>
+              {% endif %}
+            </div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:3px;">Claimed by {{ claim.claimant.username }} · {{ claim.submitted_at|date:"d M Y, H:i" }}</div>
+          </div>
+          <a href="{% url 'claim_review_detail' claim.id %}" class="btn lk" style="font-size:13px; font-weight:600; color:#fff; background:#0f2240; padding:9px 20px; border-radius:8px; text-decoration:none; white-space:nowrap; transition:transform .15s ease, box-shadow .2s ease;">Review</a>
+        </div>
+        {% empty %}
+        <div style="padding:28px 24px; text-align:center; font-size:14px; color:#9aa6b6;">No claims pending decision.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- section 2: approved claims awaiting physical collection -->
+    <div class="lf-load" style="margin-bottom:30px;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f9d61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"></path></svg>
+        <h3 style="font-size:18px; font-weight:700; color:#0f2240; margin:0;">Approved — Awaiting Collection</h3>
+        {% if approved_claims %}<span style="font-size:12px; font-weight:700; color:#1f7a4d; background:#e4f3ec; padding:3px 9px; border-radius:999px;">{{ approved_claims|length }}</span>{% endif %}
+      </div>
+      <p style="font-size:13.5px; color:#9aa6b6; margin:0 0 14px;">Claims approved — student has been notified. Mark as collected once they physically collect the item.</p>
+      <div style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+        {% for claim in approved_claims %}
+        <div class="row" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px; {% if not forloop.last %}border-bottom:1px solid #f1f4f8;{% endif %}">
+          <div>
+            <div style="font-size:15px; font-weight:700; color:#15233b;">{{ claim.item.title }}</div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:3px;">Claimed by <strong style="color:#46566f;">{{ claim.claimant.username }}</strong> · {{ claim.claimant.email }} · approved {{ claim.reviewed_at|date:"d M Y" }}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1f7a4d; background:#e4f3ec; padding:5px 11px; border-radius:6px; white-space:nowrap;">Approved</span>
+            <form method="post" action="{% url 'mark_collected' claim.id %}" onsubmit="return confirm('Mark this item as collected by {{ claim.claimant.username }}?');">
+              {% csrf_token %}
+              <button type="submit" class="btn lk" style="font-size:13px; font-weight:600; color:#fff; background:#1a7a4f; border:none; padding:9px 18px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:transform .15s ease, box-shadow .2s ease;">
+                ✓ Mark Collected
+              </button>
+            </form>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:28px 24px; text-align:center; font-size:14px; color:#9aa6b6;">No approved claims awaiting collection.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- section 3: found items awaiting claim -->
+    <div class="lf-load" style="margin-bottom:30px;">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f9d61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path><path d="m3.3 7 8.7 5 8.7-5"></path><path d="M12 22V12"></path></svg>
+        <h3 style="font-size:18px; font-weight:700; color:#0f2240; margin:0;">Found Items — Awaiting a Claim</h3>
+        {% if unclaimed_found %}<span style="font-size:12px; font-weight:700; color:#1f7a4d; background:#e4f3ec; padding:3px 9px; border-radius:999px;">{{ unclaimed_found|length }}</span>{% endif %}
+      </div>
+      <p style="font-size:13.5px; color:#9aa6b6; margin:0 0 14px;">Logged as found but no student has claimed them yet.</p>
+      <div style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+        {% for item in unclaimed_found %}
+        <div class="row" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px; {% if not forloop.last %}border-bottom:1px solid #f1f4f8;{% endif %}">
+          <div>
+            <div style="font-size:15px; font-weight:700; color:#15233b;">{{ item.title }}</div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:2px;">{{ item.get_category_display }} · {{ item.location }} · logged by {{ item.reported_by.username }} on {{ item.date_reported }}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1a4fa0; background:#eaf0f9; padding:5px 11px; border-radius:6px;">Open</span>
+            <a href="{% url 'item_manage' item.id %}" class="mbtn lk" style="font-size:12.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:7px 14px; border-radius:8px; text-decoration:none;">Manage</a>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:28px 24px; text-align:center; font-size:14px; color:#9aa6b6;">No unclaimed found items.</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- section 3: lost item reports -->
+    <div class="lf-load">
+      <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#d64545" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+        <h3 style="font-size:18px; font-weight:700; color:#0f2240; margin:0;">Lost Item Reports</h3>
+        {% if lost_reports %}<span style="font-size:12px; font-weight:700; color:#a82020; background:#fdecec; padding:3px 9px; border-radius:999px;">{{ lost_reports|length }}</span>{% endif %}
+      </div>
+      <p style="font-size:13.5px; color:#9aa6b6; margin:0 0 14px;">Reported as lost by students. Match these with found items when possible.</p>
+      <div style="background:#fff; border:1px solid #e9edf2; border-radius:16px; overflow:hidden;">
+        {% for item in lost_reports %}
+        <div class="row" style="display:flex; align-items:center; justify-content:space-between; gap:14px; padding:16px 24px; {% if not forloop.last %}border-bottom:1px solid #f1f4f8;{% endif %}">
+          <div>
+            <div style="font-size:15px; font-weight:700; color:#15233b;">{{ item.title }}</div>
+            <div style="font-size:13px; color:#9aa6b6; margin-top:2px;">{{ item.get_category_display }} · {{ item.location }} · reported by {{ item.reported_by.username }} on {{ item.date_reported }}</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            {% if item.status == 'open' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1a4fa0; background:#eaf0f9; padding:5px 11px; border-radius:6px;">Open</span>
+            {% elif item.status == 'under_review' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#b06a18; background:#fbeede; padding:5px 11px; border-radius:6px;">Under Review</span>
+            {% elif item.status == 'returned' %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#1f7a4d; background:#e4f3ec; padding:5px 11px; border-radius:6px;">Returned</span>
+            {% else %}
+              <span style="font-size:11px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:#46566f; background:#eef1f5; padding:5px 11px; border-radius:6px;">{{ item.get_status_display }}</span>
+            {% endif %}
+            <a href="{% url 'item_manage' item.id %}" class="mbtn lk" style="font-size:12.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:7px 14px; border-radius:8px; text-decoration:none;">Manage</a>
+          </div>
+        </div>
+        {% empty %}
+        <div style="padding:28px 24px; text-align:center; font-size:14px; color:#9aa6b6;">No lost item reports.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

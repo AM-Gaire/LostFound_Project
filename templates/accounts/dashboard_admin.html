@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | Campus Lost &amp; Found</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Libre Franklin', sans-serif; color: #15233b; background: #f4f6fa; }
+
+    .lk { transition: color .15s ease, opacity .15s ease, background .15s ease, transform .15s ease, box-shadow .2s ease, border-color .15s ease; }
+    .lk:hover { opacity: .85; }
+    .navlink { position:relative; transition: color .15s ease, background .15s ease; border-radius: 8px; }
+    .navlink:hover { color: #0f2240 !important; background: #f1f4f9; }
+    .navlink.active { color: #0f2240 !important; background: #eaf0f9; font-weight: 600 !important; }
+    .action { transition: transform .22s cubic-bezier(.22,1,.36,1), box-shadow .22s ease; }
+    .action:hover { transform: translateY(-3px); box-shadow: 0 26px 52px -26px rgba(15,34,64,.4); }
+    .action:hover .arr { transform: translateX(4px); }
+    .arr { transition: transform .2s ease; display:inline-block; }
+    .scard { transition: box-shadow .22s ease, transform .22s ease; }
+    .scard:hover { box-shadow: 0 18px 44px -24px rgba(15,34,64,.28); transform: translateY(-2px); }
+    .arow { transition: background .14s ease; }
+    .arow:hover { background: #f8fafc; }
+
+    @keyframes lfUp { from { opacity:0; transform:translateY(22px); filter:blur(6px); } to { opacity:1; transform:none; filter:blur(0); } }
+    .lf-load { opacity:0; animation: lfUp .7s cubic-bezier(.22,1,.36,1) forwards; }
+    [data-group] > * { opacity:0; transform:translateY(20px); filter:blur(5px); transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1), filter .6s ease; }
+    [data-group].lf-seen > * { opacity:1; transform:none; filter:blur(0); }
+    [data-group].lf-seen > *:nth-child(2){ transition-delay:.07s; }
+    [data-group].lf-seen > *:nth-child(3){ transition-delay:.14s; }
+    [data-group].lf-seen > *:nth-child(4){ transition-delay:.21s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lf-load, [data-group] > * { animation:none!important; opacity:1!important; transform:none!important; filter:none!important; }
+    }
+    @media (max-width: 900px) {
+      .stat-grid   { grid-template-columns: 1fr 1fr !important; }
+      .action-grid { grid-template-columns: 1fr !important; }
+      .panel-grid  { grid-template-columns: 1fr !important; }
+      .nav-links   { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div style="background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid #e7ebf1;position:sticky;top:0;z-index:30;">
+  <div style="max-width:1320px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:14px 40px;">
+    <div style="display:flex;align-items:center;gap:36px;">
+      <a href="{% url 'dashboard' %}" style="display:flex;align-items:center;gap:8px;font-family:'Source Serif 4',serif;font-weight:700;font-size:20px;color:#0f2240;letter-spacing:-.03em;white-space:nowrap;text-decoration:none;">
+        <span style="width:32px;height:32px;border-radius:9px;background:#0f2240;display:flex;align-items:center;justify-content:center;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#e9a64a" stroke-width="2.6" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        </span><span style="white-space:nowrap;">LostFound<span style="color:#cf7a2c;">@</span>Campus</span>
+      </a>
+      <div class="nav-links" style="display:flex;gap:4px;">
+        <a href="{% url 'dashboard' %}" class="navlink active" style="font-size:14px;color:#0f2240;text-decoration:none;padding:9px 15px;">Dashboard</a>
+        <a href="{% url 'all_items' %}" class="navlink" style="font-size:14px;font-weight:500;color:#5b6b7e;text-decoration:none;padding:9px 15px;">All Items</a>
+        <a href="{% url 'claim_review_list' %}" class="navlink" style="font-size:14px;font-weight:500;color:#5b6b7e;text-decoration:none;padding:9px 15px;">Review Claims</a>
+        <a href="{% url 'manage_users' %}" class="navlink" style="font-size:14px;font-weight:500;color:#5b6b7e;text-decoration:none;padding:9px 15px;">Manage Users</a>
+        <a href="{% url 'audit_log' %}" class="navlink" style="font-size:14px;font-weight:500;color:#5b6b7e;text-decoration:none;padding:9px 15px;">Audit Log</a>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div style="display:flex;align-items:center;gap:10px;padding:5px 6px 5px 14px;border:1px solid #e7ebf1;border-radius:999px;background:#fff;">
+        <div style="text-align:right;line-height:1.2;">
+          <div style="font-size:13.5px;font-weight:600;color:#15233b;">{{ user.username }}</div>
+          <div style="font-size:11.5px;color:#9aa6b6;">Administrator</div>
+        </div>
+        <div style="width:34px;height:34px;border-radius:50%;background:linear-gradient(150deg,#163763,#0f2240);color:#e9a64a;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;">
+          {{ user.username|slice:":1"|upper }}
+        </div>
+      </div>
+      <form method="post" action="{% url 'logout' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="lk" style="font-size:13.5px;font-weight:600;color:#0f2240;border:1.5px solid #d7dde6;padding:9px 16px;border-radius:9px;background:#fff;cursor:pointer;">Log Out</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% if messages %}
+<div style="max-width:1320px;margin:0 auto;padding:16px 40px 0;">
+  {% for message in messages %}
+  <div style="padding:12px 16px;border-radius:10px;font-size:14px;font-weight:500;margin-bottom:8px;
+    {% if message.tags == 'error' %}background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;
+    {% else %}background:#f0fdf4;color:#166534;border:1px solid #bbf7d0;{% endif %}">
+    {{ message }}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<div style="max-width:1320px;margin:0 auto;padding:44px 40px 64px;">
+
+  <!-- Welcome -->
+  <div class="lf-load" style="margin-bottom:34px;">
+    <div style="font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#cf7a2c;margin-bottom:12px;">Administrator Portal</div>
+    <h1 style="font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:#0f2240;margin:0 0 10px;letter-spacing:-.02em;">Welcome back, {{ user.username }}</h1>
+    <p style="font-size:17px;color:#566;margin:0;">Review claims, manage items, and monitor the audit trail.</p>
+  </div>
+
+  <!-- Stat cards -->
+  <div class="stat-grid" data-group style="display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-bottom:24px;">
+    <div class="scard" style="position:relative;background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:26px 28px;overflow:hidden;">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#2a6fdb;"></div>
+      <div style="font-size:13px;font-weight:600;color:#5b6b7e;margin-bottom:14px;">Total Items</div>
+      <div style="font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:#0f2240;line-height:1;">{{ total_items }}</div>
+    </div>
+    <div class="scard" style="position:relative;background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:26px 28px;overflow:hidden;">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#cf7a2c;"></div>
+      <div style="font-size:13px;font-weight:600;color:#5b6b7e;margin-bottom:14px;">Claims Needing Review</div>
+      <div style="font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:#0f2240;line-height:1;">{{ pending_claims }}</div>
+    </div>
+    <div class="scard" style="position:relative;background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:26px 28px;overflow:hidden;">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#16a4c4;"></div>
+      <div style="font-size:13px;font-weight:600;color:#5b6b7e;margin-bottom:14px;">Lost Reports</div>
+      <div style="font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:#0f2240;line-height:1;">{{ total_lost }}</div>
+    </div>
+    <div class="scard" style="position:relative;background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:26px 28px;overflow:hidden;">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:#1f9d61;"></div>
+      <div style="font-size:13px;font-weight:600;color:#5b6b7e;margin-bottom:14px;">Found Reports</div>
+      <div style="font-family:'Source Serif 4',serif;font-size:42px;font-weight:700;color:#0f2240;line-height:1;">{{ total_found }}</div>
+    </div>
+  </div>
+
+  <!-- Action cards -->
+  <div class="action-grid" data-group style="display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-bottom:44px;">
+    <a href="{% url 'claim_review_list' %}" class="action" style="background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:28px;text-decoration:none;display:flex;align-items:center;gap:18px;">
+      <div style="width:52px;height:52px;flex:none;border-radius:13px;background:#eaf0f9;display:flex;align-items:center;justify-content:center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2a6fdb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:700;color:#0f2240;margin-bottom:3px;">Review Claims</div>
+        <div style="font-size:13.5px;color:#7c899c;">{{ pending_claims }} claim{{ pending_claims|pluralize }} waiting</div>
+      </div>
+      <span class="arr" style="color:#c4ccd6;font-size:20px;">→</span>
+    </a>
+    <a href="{% url 'all_items' %}" class="action" style="background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:28px;text-decoration:none;display:flex;align-items:center;gap:18px;">
+      <div style="width:52px;height:52px;flex:none;border-radius:13px;background:#eef1f5;display:flex;align-items:center;justify-content:center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5b6878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:700;color:#0f2240;margin-bottom:3px;">All Items</div>
+        <div style="font-size:13.5px;color:#7c899c;">View and manage all reports</div>
+      </div>
+      <span class="arr" style="color:#c4ccd6;font-size:20px;">→</span>
+    </a>
+    <a href="{% url 'audit_log' %}" class="action" style="background:#fff;border:1px solid #e9edf2;border-radius:16px;padding:28px;text-decoration:none;display:flex;align-items:center;gap:18px;">
+      <div style="width:52px;height:52px;flex:none;border-radius:13px;background:#e4f3ec;display:flex;align-items:center;justify-content:center;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1f9d61" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>
+      </div>
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:700;color:#0f2240;margin-bottom:3px;">Audit Log</div>
+        <div style="font-size:13.5px;color:#7c899c;">Full action history</div>
+      </div>
+      <span class="arr" style="color:#c4ccd6;font-size:20px;">→</span>
+    </a>
+  </div>
+
+  <!-- Bottom panels -->
+  <div class="panel-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+    <!-- Claims panel -->
+    <div class="lf-load" style="animation-delay:.1s;background:#fff;border:1px solid #e9edf2;border-radius:16px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:22px 26px;border-bottom:1px solid #eef1f5;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#cf7a2c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"/></svg>
+        <h3 style="font-size:17px;font-weight:700;color:#0f2240;margin:0;">Claims Needing Review</h3>
+      </div>
+      {% if recent_claims %}
+        {% for claim in recent_claims %}
+        <div class="arow" style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 26px;border-bottom:1px solid #f1f4f8;">
+          <div>
+            <div style="font-size:15px;font-weight:600;color:#0f2240;margin-bottom:2px;">{{ claim.item.title }}</div>
+            <div style="font-size:13px;color:#7c899c;">by {{ claim.claimant.username }} · {{ claim.submitted_at|date:"d M Y" }}
+              {% if claim.status == 'info_requested' %}
+                <span style="font-size:11px;font-weight:700;color:#0369a1;background:#e0f2fe;padding:2px 7px;border-radius:4px;margin-left:6px;">Info Requested</span>
+              {% else %}
+                <span style="font-size:11px;font-weight:700;color:#92400e;background:#fef3c7;padding:2px 7px;border-radius:4px;margin-left:6px;">Pending</span>
+              {% endif %}
+            </div>
+          </div>
+          <a href="{% url 'claim_review_detail' claim.id %}" style="font-size:13px;font-weight:600;color:#fff;background:#0f2240;padding:8px 16px;border-radius:8px;text-decoration:none;white-space:nowrap;">Review</a>
+        </div>
+        {% endfor %}
+        <div style="display:flex;justify-content:flex-end;padding:16px 26px;">
+          <a href="{% url 'claim_review_list' %}" class="lk" style="font-size:13px;font-weight:600;color:#0f2240;border:1.5px solid #d7dde6;padding:8px 16px;border-radius:8px;text-decoration:none;">View All</a>
+        </div>
+      {% else %}
+        <div style="padding:48px 26px;text-align:center;">
+          <div style="width:46px;height:46px;border-radius:50%;background:#e4f3ec;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1f9d61" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+          </div>
+          <div style="font-size:15px;color:#7c899c;">No claims pending review.</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Audit panel -->
+    <div class="lf-load" style="animation-delay:.2s;background:#fff;border:1px solid #e9edf2;border-radius:16px;overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:10px;padding:22px 26px;border-bottom:1px solid #eef1f5;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0f2240" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>
+        <h3 style="font-size:17px;font-weight:700;color:#0f2240;margin:0;">Recent Audit Entries</h3>
+      </div>
+      {% for log in recent_audit %}
+      <div class="arow" style="display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 26px;border-bottom:1px solid #f1f4f8;">
+        <div style="display:flex;align-items:center;gap:10px;min-width:0;">
+          <span style="font-size:11px;font-weight:700;letter-spacing:.04em;white-space:nowrap;padding:4px 9px;border-radius:6px;
+            {% if 'APPROVED' in log.action_type %}color:#166534;background:#dcfce7;
+            {% elif 'REJECTED' in log.action_type %}color:#991b1b;background:#fee2e2;
+            {% elif 'REPORTED' in log.action_type %}color:#0f2240;background:#fbeede;
+            {% else %}color:#46566f;background:#eef1f5;{% endif %}">
+            {{ log.action_type }}
+          </span>
+          <span style="font-size:14px;color:#3a4a61;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ log.performed_by.username }} · {{ log.related_item.title|default:"—" }}</span>
+        </div>
+        <span style="font-size:13px;color:#9aa6b6;white-space:nowrap;">{{ log.timestamp|date:"d M, H:i" }}</span>
+      </div>
+      {% empty %}
+      <div style="padding:32px 26px;font-size:15px;color:#7c899c;text-align:center;">No audit entries yet.</div>
+      {% endfor %}
+      <div style="display:flex;justify-content:flex-end;padding:16px 26px;">
+        <a href="{% url 'audit_log' %}" class="lk" style="font-size:13px;font-weight:600;color:#0f2240;border:1.5px solid #d7dde6;padding:8px 16px;border-radius:8px;text-decoration:none;">Full Audit Log</a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  var setup = function(){
+    var nodes = document.querySelectorAll('[data-group]:not(.lf-seen)');
+    if(!('IntersectionObserver' in window)){ nodes.forEach(function(n){n.classList.add('lf-seen');}); return; }
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){ e.target.classList.add('lf-seen'); }
+        else { e.target.classList.remove('lf-seen'); }
+      });
+    },{threshold:0.15,rootMargin:'-4% 0px -8% 0px'});
+    nodes.forEach(function(n){obs.observe(n);});
+  };
+  requestAnimationFrame(function(){requestAnimationFrame(setup);});
+})();
+</script>
+
+</body>
+</html>

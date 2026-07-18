@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Delete — {{ target.username }} | Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { margin: 0; }
+    .lk { transition: color .15s ease, opacity .15s ease, background .15s ease, transform .15s ease, box-shadow .2s ease, border-color .15s ease; }
+    .lk:hover { opacity: .85; }
+    .btn-danger { transition: transform .15s ease, box-shadow .2s ease; }
+    .btn-danger:hover { transform: translateY(-1px); box-shadow: 0 16px 32px -14px rgba(192,40,40,.45); }
+    .btn-ghost { transition: transform .15s ease, background .15s ease, border-color .15s ease; }
+    .btn-ghost:hover { background: #f1f4f9; border-color: #cdd9ec; }
+    @keyframes lfUp { from { opacity:0; transform:translateY(22px); filter:blur(6px); } to { opacity:1; transform:none; filter:blur(0); } }
+    @keyframes lfAurora { 0%{ transform:translate(0,0) scale(1); } 50%{ transform:translate(30px,24px) scale(1.1); } 100%{ transform:translate(0,0) scale(1); } }
+    .lf-load { opacity: 0; animation: lfUp .7s cubic-bezier(.22,1,.36,1) forwards; }
+    .lf-aurora { animation: lfAurora 16s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) { .lf-load, .lf-aurora { animation:none!important; opacity:1!important; transform:none!important; filter:none!important; } }
+  </style>
+</head>
+<body>
+
+<div style="position:relative; overflow:hidden; min-height:100vh; display:flex; align-items:center; justify-content:center; padding:48px 24px; font-family:'Libre Franklin',sans-serif; color:#15233b; background:radial-gradient(120% 100% at 50% -10%, #f6eaea 0%, #f4f6fa 50%, #ffffff 85%);">
+
+  <!-- Grid pattern -->
+  <div style="position:absolute; inset:0; background-image:linear-gradient(#c0282808 1px, transparent 1px), linear-gradient(90deg, #c0282808 1px, transparent 1px); background-size:46px 46px; mask-image:radial-gradient(80% 70% at 50% 30%, #000 0%, transparent 72%); -webkit-mask-image:radial-gradient(80% 70% at 50% 30%, #000 0%, transparent 72%); pointer-events:none;"></div>
+
+  <!-- Aurora blob -->
+  <div class="lf-aurora" style="position:absolute; top:-120px; right:10%; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle, rgba(192,40,40,.1), transparent 65%); filter:blur(20px); pointer-events:none;"></div>
+
+  <div class="lf-load" style="position:relative; width:100%; max-width:460px;">
+
+    <a href="{% url 'manage_users' %}" class="lk" style="display:inline-flex; align-items:center; gap:7px; font-size:13.5px; font-weight:600; color:#0f2240; border:1.5px solid #d7dde6; padding:9px 16px; border-radius:9px; text-decoration:none; background:#fff; margin-bottom:18px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f2240" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+      Back to Manage Users
+    </a>
+
+    <div style="background:#fff; border:1px solid #eef1f5; border-radius:18px; box-shadow:0 40px 90px -40px rgba(15,34,64,.4); overflow:hidden;">
+
+      <!-- Danger Header -->
+      <div style="display:flex; align-items:center; gap:11px; padding:20px 28px; background:linear-gradient(160deg,#d23a3a,#b81f1f);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><path d="M12 9v4M12 17h.01"/></svg>
+        <h3 style="font-size:16.5px; font-weight:700; color:#fff; margin:0;">Confirm Account Deletion</h3>
+      </div>
+
+      <!-- Body -->
+      <div style="padding:38px 32px; text-align:center;">
+        <div style="width:64px; height:64px; border-radius:50%; background:#fdeaea; display:flex; align-items:center; justify-content:center; margin:0 auto 22px;">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#c02828" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M10 11v6M14 11v6"/></svg>
+        </div>
+
+        <p style="font-size:16px; color:#566; margin:0 0 6px;">You are about to delete the account:</p>
+        <p style="font-family:'Source Serif 4',serif; font-size:26px; font-weight:700; color:#0f2240; margin:0 0 6px; letter-spacing:-.01em;">{{ target.username }}</p>
+        <p style="font-size:14px; color:#9aa6b6; margin:0 0 22px;">{{ target.get_role_display }} · {{ target.email|default:"No email" }}</p>
+
+        <p style="font-size:13.5px; color:#c02828; line-height:1.55; margin:0 0 30px; background:#fdf6f6; border:1px solid #f7e0e0; border-radius:10px; padding:12px 16px;">
+          This action is permanent. All items and claims associated with this account will also be removed.
+        </p>
+
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn-danger" style="display:inline-flex; align-items:center; gap:8px; font:600 14.5px 'Libre Franklin',sans-serif; color:#fff; background:#c02828; border:none; padding:13px 26px; border-radius:10px; cursor:pointer;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              Yes, Delete
+            </button>
+          </form>
+          <a href="{% url 'manage_users' %}" class="btn-ghost lk" style="display:inline-flex; align-items:center; font:600 14.5px 'Libre Franklin',sans-serif; color:#0f2240; background:#fff; border:1.5px solid #d7dde6; padding:13px 26px; border-radius:10px; cursor:pointer; text-decoration:none;">
+            Cancel
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
