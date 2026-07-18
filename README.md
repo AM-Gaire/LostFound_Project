@@ -12,6 +12,29 @@ A full-stack Django web application for managing lost and found items on campus.
 - **Audit log** for tracking key actions across the system
 - **Automated tests** covering reporting permissions, form validation, and search behavior
 
+## Screenshots
+
+### Homepage
+![Homepage](screenshots/Homepage.png)
+
+### Sign In
+![Sign In](screenshots/Sign_in.png)
+
+### Dashboard
+![Dashboard](screenshots/Dashboard.png)
+
+### Report Lost Item
+![Report Lost Item](screenshots/Report_lost_item.png)
+
+### Search Found Items
+![Search Found Items](screenshots/search_found_item.png)
+
+### Submit a Claim
+![Submit a Claim](screenshots/Submit_a_claim.png)
+
+### Audit Log
+![Audit Log](screenshots/Auditlog.png)
+
 ## Tech Stack
 
 - **Backend:** Django 6.0
