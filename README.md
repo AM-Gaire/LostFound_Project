@@ -1,14 +1,14 @@
 # Lost & Found Project
 
-A full-stack Django web application for managing lost and found items on campus. Students can report lost or found items, search the database, and submit claims, while staff and admins review claims and track activity through an audit log.
+A full-stack Django web application for managing lost and found items on campus. Students can report lost or found items, search the database, and submit claims, while admins review claims and track activity through an audit log.
 
 ## Features
 
 - **Role-based accounts** (Student, Staff, Admin) with registration, login, logout, and password reset
 - **Item reporting** for both lost and found items, with category, location, date, and optional image upload
 - **Search and filter** for found items by keyword and category
-- **Claims workflow**: students submit identity verification answers to claim a found item; staff/admin review, approve, reject, or request more info
-- **Admin dashboard** for managing users and marking items as collected
+- **Claims workflow**: students submit identity verification answers to claim a found item; an admin reviews, approves, rejects, or requests more info
+-  **Admin dashboard** for managing users and marking items as collected
 - **Audit log** for tracking key actions across the system
 - **Automated tests** covering reporting permissions, form validation, and search behavior
 
