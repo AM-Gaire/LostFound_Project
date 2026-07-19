@@ -9,6 +9,7 @@ from .models import Claim, AuditLog
 from .forms import ClaimSubmitForm
 
 
+# NOTE: Claim review is intentionally restricted to admin accounts only (staff cannot review claims).
 def admin_required(user):
     return user.is_authenticated and user.role == 'admin'
 
